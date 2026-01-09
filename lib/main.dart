@@ -43,10 +43,11 @@ class _TodoScreenState extends State<TodoScreen> {
   int _tempPriority = 1;
 
 
+
   void _showTodoSheet({Todo? todo}) {
     if (todo != null) {
-      _controller.text = todo.title;      _tempCategory = todo.category ?? 'Work';
-      _tempPriority = todo.priority;
+      _controller.text = todo.title;
+      _tempCategory = todo.category ?? 'Work';_tempPriority = todo.priority;
     } else {
       _controller.clear();
       _tempCategory = 'Work';
@@ -56,48 +57,49 @@ class _TodoScreenState extends State<TodoScreen> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
-      ),
+      backgroundColor: Colors.transparent,
       builder: (context) => StatefulBuilder(
         builder: (context, setModalState) => TweenAnimationBuilder<double>(
           duration: const Duration(milliseconds: 400),
-          curve: Curves.easeOutBack, // Gives a slight "bounce" effect
-          tween: Tween(begin: 0.0, end: 1.0),
-          builder: (context, value, child) {
+          curve: Curves.easeOutBack,
+          tween: Tween<double>(begin: 0.0, end: 1.0),
+          builder: (context, double value, child) {
             return Opacity(
-              opacity: value,
+              // FIX: Clamp the value so it never goes below 0.0 or above 1.0
+              opacity: value.clamp(0.0, 1.0),
               child: Transform.translate(
-                offset: Offset(0, 50 * (1 - value)), // Slides up 50 pixels
+                // The Transform can still use the 'overshoot' for the bounce effect
+                offset: Offset(0, 50 * (1 - value)),
                 child: child,
               ),
             );
           },
-          child: Padding(
+          child: Container(
             padding: EdgeInsets.only(
               bottom: MediaQuery.of(context).viewInsets.bottom,
               left: 25, right: 25, top: 20,
+            ),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surface,
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(25)),
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Handle bar for better UX
                 Center(
                   child: Container(
-                    width: 40,
-                    height: 4,
+                    width: 40, height: 4,
                     margin: const EdgeInsets.only(bottom: 20),
                     decoration: BoxDecoration(
-                      color: Colors.grey[300],
+                      color: Theme.of(context).dividerColor,
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),
                 ),
                 Text(
                   todo == null ? 'New Task' : 'Edit Task',
-                  style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 20),
                 TextField(
@@ -106,8 +108,7 @@ class _TodoScreenState extends State<TodoScreen> {
                   decoration: InputDecoration(
                     hintText: 'What needs to be done?',
                     filled: true,
-                    fillColor: Colors.grey[100],
-                    contentPadding: const EdgeInsets.all(16),
+                    fillColor: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(15),
                       borderSide: BorderSide.none,
@@ -115,7 +116,7 @@ class _TodoScreenState extends State<TodoScreen> {
                   ),
                 ),
                 const SizedBox(height: 25),
-                const Text("Category", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.indigo)),
+                Text("Category", style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary)),
                 const SizedBox(height: 10),
                 Wrap(
                   spacing: 10,
@@ -124,12 +125,11 @@ class _TodoScreenState extends State<TodoScreen> {
                       label: Text(cat),
                       selected: _tempCategory == cat,
                       onSelected: (val) => setModalState(() => _tempCategory = cat),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                     );
                   }).toList(),
                 ),
                 const SizedBox(height: 20),
-                const Text("Priority", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.indigo)),
+                Text("Priority", style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary)),
                 const SizedBox(height: 10),
                 Row(
                   children: [
@@ -142,10 +142,9 @@ class _TodoScreenState extends State<TodoScreen> {
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     minimumSize: const Size(double.infinity, 55),
-                    backgroundColor: Colors.indigo,
-                    foregroundColor: Colors.white,
+                    backgroundColor: Theme.of(context).colorScheme.primary,
+                    foregroundColor: Theme.of(context).colorScheme.onPrimary,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                    elevation: 0,
                   ),
                   onPressed: () {
                     if (_controller.text.isNotEmpty) {
@@ -160,10 +159,7 @@ class _TodoScreenState extends State<TodoScreen> {
                       Navigator.pop(context);
                     }
                   },
-                  child: Text(
-                    todo == null ? 'Create Task' : 'Update Task',
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
+                  child: Text(todo == null ? 'Create Task' : 'Update Task'),
                 ),
                 const SizedBox(height: 30),
               ],
@@ -173,6 +169,7 @@ class _TodoScreenState extends State<TodoScreen> {
       ),
     );
   }
+
 
   Widget _prioChip(StateSetter setState, int val, String label, Color color) {
     bool isSelected = _tempPriority == val;
