@@ -108,7 +108,7 @@ class _TodoScreenState extends State<TodoScreen> {
                   decoration: InputDecoration(
                     hintText: 'What needs to be done?',
                     filled: true,
-                    fillColor: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
+                    fillColor: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(15),
                       borderSide: BorderSide.none,
@@ -133,9 +133,9 @@ class _TodoScreenState extends State<TodoScreen> {
                 const SizedBox(height: 10),
                 Row(
                   children: [
-                    _prioChip(setModalState, 0, "Low", Colors.green),
-                    _prioChip(setModalState, 1, "Med", Colors.orange),
-                    _prioChip(setModalState, 2, "High", Colors.red),
+                    _priorityChip(setModalState, 0, "Low", Colors.green),
+                    _priorityChip(setModalState, 1, "Med", Colors.orange),
+                    _priorityChip(setModalState, 2, "High", Colors.red),
                   ],
                 ),
                 const SizedBox(height: 30),
@@ -171,14 +171,14 @@ class _TodoScreenState extends State<TodoScreen> {
   }
 
 
-  Widget _prioChip(StateSetter setState, int val, String label, Color color) {
+  Widget _priorityChip(StateSetter setState, int val, String label, Color color) {
     bool isSelected = _tempPriority == val;
     return Padding(
       padding: const EdgeInsets.only(right: 8.0),
       child: ChoiceChip(
         label: Text(label),
         selected: isSelected,
-        selectedColor: color.withOpacity(0.2),
+        selectedColor: color.withValues(alpha: 0.2),
         onSelected: (selected) => setState(() => _tempPriority = val),
       ),
     );
